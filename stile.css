@@ -1,71 +1,61 @@
-body {
-  font-family: "Poppins", sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f7f9fb;
-  color: #333;
+.pdf-card {
+  display: inline-block;
   text-align: center;
-}
-
-header {
-  background-color: #fff;
-  padding: 10px;
-  border-bottom: 2px solid #007bff;
-}
-
-.logo {
-  width: 180px;
-  display: block;
-  margin: 0 auto;
-}
-
-nav {
-  margin-top: 5px;
-}
-
-nav a {
-  margin: 0 10px;
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-main {
+  margin: 20px;
+  background: #fff;
   padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: 0.3s;
 }
-
-h1, h2 {
-  color: #007bff;
+.pdf-card:hover {
+  transform: scale(1.05);
 }
-
-.pdf-container, .img-container {
+.pdf-icon {
+  width: 80px;
+  margin-bottom: 10px;
+}
+.img-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 15px;
 }
-
-.pdf-card {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 10px;
-  transition: transform 0.2s;
-}
-
-.pdf-icon {
-  width: 80px;
-}
-
 .preview-img {
   width: 150px;
-  height: auto;
+  height: 150px;
+  object-fit: cover;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.3s ease;
+}
+.preview-img:hover {
+  transform: scale(1.1);
 }
 
-.preview-img:hover {
-  transform: scale(1.05);
+/* LIGHTBOX */
+.lightbox {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.lightbox.hidden { display: none; }
+.lightbox iframe, .lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  background: #fff;
+}
+.close {
+  position: absolute;
+  top: 30px; right: 50px;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
 }
