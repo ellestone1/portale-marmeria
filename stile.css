@@ -1,61 +1,413 @@
-.pdf-card {
-  display: inline-block;
-  text-align: center;
-  margin: 20px;
-  background: #fff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: 0.3s;
-}
-.pdf-card:hover {
-  transform: scale(1.05);
-}
-.pdf-icon {
-  width: 80px;
-  margin-bottom: 10px;
-}
-.img-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-}
-.preview-img {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-.preview-img:hover {
-  transform: scale(1.1);
+/* ============================================= */
+/* --- IMPOSTAZIONI GLOBALI --- */
+/* ============================================= */
+:root {
+    --primary-color: #0056b3; /* Blu come da logo */
+    --text-color: #333;
+    --background-color: #f5f8fa; /* Leggermente più chiaro */
+    --surface-color: #ffffff;
+    --border-color: #e6e6e6; /* Bordo più leggero */
+    --shadow-soft: 0 4px 12px rgba(0,0,0,0.08); /* Ombra più morbida */
+    --shadow-hover: 0 8px 16px rgba(0,0,0,0.12);
+    --main-font: 'Poppins', system-ui, sans-serif;
+    --border-radius: 10px; /* Angoli leggermente più arrotondati */
 }
 
-/* LIGHTBOX */
+html { scroll-behavior: smooth; }
+body { font-family: var(--main-font); margin: 0; background-color: var(--background-color); color: var(--text-color); line-height: 1.6; }
+
+/* ============================================= */
+/* --- HEADER (MOBILE FIRST con effetto scroll) --- */
+/* ============================================= */
+header {
+    display: flex;
+    flex-direction: column; /* Logo sopra, menu sotto */
+    align-items: center;   /* Tutto centrato */
+    padding: 20px;
+    gap: 15px;             /* Spazio tra logo e menu */
+    background: var(--surface-color);
+    position: sticky; /* Rende l'header fisso */
+    top: 0;
+    z-index: 10;
+    transition: transform 0.4s ease, opacity 0.4s ease, box-shadow 0.3s ease; /* Transizione per nascondere e ombra */
+    box-shadow: var(--shadow-soft);
+}
+/* Classe per nascondere l'header allo scroll */
+header.hidden {
+    opacity: 0;
+    transform: translateY(-100%); /* Scivola verso l'alto */
+    pointer-events: none; /* Rende non cliccabile quando nascosto */
+}
+.logo { width: 220px; max-width: 90%; height: auto; transition: all 0.3s ease; }
+.nav-links { background-color: var(--primary-color); width: 100%; display: flex; justify-content: center; gap: 1.5rem; padding: 0.6rem 0; margin-top: 10px; border-radius: 5px;}
+.nav-links a { color: white; text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+
+/* ============================================= */
+/* --- CONTENUTO PRINCIPALE --- */
+/* ============================================= */
+main { padding: 1.5rem; text-align: center; max-width: 1200px; margin: 0 auto; }
+.intro { margin-bottom: 2rem; }
+.titolo { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.3rem; color: #333; }
+.codice-dv { color: var(--primary-color); font-weight: 700; font-size: 1.4em; margin-bottom: 1.5rem; }
+
+/* Titoli Sezione */
+h2 { color: var(--primary-color); font-size: 1.1rem; margin: 2rem 0 1rem; position: relative; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; display: inline-block;}
+
+/* Contenitori PDF e Immagini */
+.pdf-container, .img-container {
+    display: grid; /* Usa Grid Layout */
+    justify-content: center;
+    gap: 1.2rem; /* Spazio tra le card */
+}
+
+/* Griglia Immagini (2 colonne su mobile) */
+.img-container {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Card Generica */
+.file-card {
+    background: var(--surface-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0; /* No padding interno per immagine a filo */
+}
+.file-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: var(--shadow-hover); }
+
+/* Card PDF */
+.pdf-card {
+    grid-column: 1 / -1; /* Occupa tutta la larghezza */
+    padding: 1.5rem 1rem;
+    min-height: 150px;
+    text-decoration: none;
+    color: inherit;
+}
+.pdf-card img {
+    width: 60px;
+    height: auto;
+    margin-bottom: 0.8rem;
+}
+.pdf-card p {
+    font-size: 0.85em;
+    font-weight: 500;
+    word-break: break-word;
+    color: #555;
+    margin-top: 0.5rem;
+}
+
+/* Card Immagine */
+.img-card {
+     height: 150px; /* Altezza fissa */
+}
+.img-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Immagine copre */
+}
+
+/* Titolo Galleria */
+.gallery-title { grid-column: 1 / -1; margin-bottom: 1rem;}
+
+/* Lightbox */
 .lightbox {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
-.lightbox.hidden { display: none; }
-.lightbox iframe, .lightbox img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 10px;
-  background: #fff;
+.lightbox.visible { display: flex; opacity: 1; }
+.lightbox-content {
+    width: 90%;
+    height: 85%;
+    border-radius: var(--border-radius);
+    background-color: #fff;
+    transition: transform 0.3s ease-out; /* Per rotazione */
+    overflow: hidden;
 }
-.close {
-  position: absolute;
-  top: 30px; right: 50px;
-  font-size: 2rem;
-  color: white;
-  cursor: pointer;
+#lightbox-img { display: none; } /* Non usiamo più img */
+#lightbox-iframe { display: block; width: 100%; height: 100%; border: none;}
+.close { position: absolute; top: 15px; right: 25px; color: white; font-size: 2.5rem; cursor: pointer; line-height: 1; }
+.lightbox-controls { margin-top: 1rem; display: flex; gap: 0.8rem; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1001;} /* Posizionati in basso */
+.lightbox-controls button {
+    background: rgba(255, 255, 255, 0.9); border: none; padding: 0.6rem 1rem; border-radius: 8px;
+    font-size: 1.5rem; line-height: 1; margin: 0 0.3rem; cursor: pointer; transition: all 0.2s; color: #333;
 }
+.lightbox-controls button:hover { background: #007ad6; color: white; transform: scale(1.05); }
+.counter { color: white; font-size: 1rem; align-self: center; margin: 0 0.5rem; position: absolute; top: 25px; left: 25px; background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 15px;} /* Contatore in alto a sx */
+
+
+/* Stili specifici per schermi più grandi */
+@media screen and (min-width: 768px) {
+    header { text-align: left; padding: 1rem 2rem; flex-direction: row; justify-content: space-between; }
+    header.hidden { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+    .nav-links { padding: 0; background: none; width: auto; margin-top: 0; }
+    main { padding: 2rem; }
+    .intro {text-align: left;}
+    .titolo { font-size: 1.8rem; }
+    .codice-dv { font-size: 1.4em; }
+    h2 { font-size: 1.3rem; }
+    .pdf-container { justify-content: flex-start; }
+    .img-container { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .pdf-card { max-width: 50%; }
+    .img-card { height: 180px; }
+}
+```eof
+
+---
+### \#\# 3. Codice `script.js` (Finale - API)
+
+```javascript:Script Portale QR - API (Finale):script.js
+document.addEventListener('DOMContentLoaded', async function () {
+    // ==============================================
+    // 🔧 CONFIGURAZIONE
+    const API_KEY = 'AIzaSyBg_v7mveOrwTc0plNByUZ-BXjJOWv5AIg'; // Chiave API inserita
+    // ==============================================
+
+    // Elementi del DOM (basati sul tuo ultimo HTML)
+    const codiceDvDisplay = document.getElementById('codice-dv');
+    const pdfContainer = document.getElementById('pdf-container');
+    const imgContainer = document.getElementById('img-container');
+    const imgGalleryTitle = document.querySelector('.galleria h2');
+    const pdfSectionTitle = document.querySelector('.documentazione h2');
+    const header = document.querySelector('header'); // Seleziona l'header per l'effetto scroll
+
+    // Elementi Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxIframe = document.getElementById('lightbox-iframe');
+    const closeLightboxBtn = document.getElementById('close-lightbox');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const rotateBtn = document.getElementById('rotate-btn'); // Pulsante rotazione singolo
+    const lightboxCounter = document.getElementById('lightbox-counter'); // Contatore se esiste
+
+    let allFiles = []; // Array per tutti i file
+    let currentGalleryFiles = []; // Array solo per le immagini (per navigazione)
+    let currentIndex = -1; // Indice navigazione
+    let currentRotation = 0; // Rotazione
+
+    // Leggi i parametri dall'URL
+    const params = new URLSearchParams(window.location.search);
+    const projectCode = params.get('codiceDv');
+    const folderId = params.get('folderId');
+
+    console.log('[PORTALE] Folder ID:', folderId);
+
+    // Mostra Codice DV
+    if (codiceDvDisplay && projectCode) {
+        codiceDvDisplay.textContent = decodeURIComponent(projectCode);
+    } else if (codiceDvDisplay) {
+        codiceDvDisplay.textContent = 'N/D';
+    }
+
+    // Controlli API Key e Folder ID
+    const errorContainer = pdfContainer || imgContainer || document.body;
+    // Correzione controllo API KEY
+    if (!API_KEY || API_KEY === 'INCOLLA_LA_TUA_CHIAVE_API_QUI' || API_KEY.length < 10) { // Aggiunto controllo lunghezza minima
+        errorContainer.innerHTML = `<p style="color:red;">⚠️ Chiave API mancante o non valida.</p>`;
+        return;
+    }
+    if (!folderId) {
+        errorContainer.innerHTML = `<p style="color:red;">⚠️ ID cartella mancante.</p>`;
+        return;
+    }
+
+    // Chiamata API Google Drive
+    const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,thumbnailLink)&key=${API_KEY}`;
+    console.log('[PORTALE] API URL:', apiUrl);
+
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('[PORTALE] Errore API:', data.error);
+            errorContainer.innerHTML = `<p style="color:red;">Errore Google API: ${data.error.message}</p>`;
+            return;
+        }
+
+        if (!data.files || data.files.length === 0) {
+            errorContainer.innerHTML = `<p>Nessun file trovato.</p>`;
+            if(pdfSectionTitle) pdfSectionTitle.style.display = 'none';
+            if(imgGalleryTitle) imgGalleryTitle.style.display = 'none';
+            return;
+        }
+
+        allFiles = data.files;
+        renderFiles(allFiles); // Mostra i file
+
+    } catch (error) {
+        console.error('[PORTALE] Errore di rete:', error);
+        errorContainer.innerHTML = `<p style="color:red;">Errore collegamento Google Drive.</p>`;
+    }
+
+    // ==============================================
+    // 🔹 RENDER FILE
+    function renderFiles(files) {
+        pdfContainer.innerHTML = '';
+        imgContainer.innerHTML = '';
+        currentGalleryFiles = [];
+
+        let pdfFound = false;
+        let imagesFound = false;
+
+        // Ordina: PDF prima
+         files.sort((a, b) => {
+             const isAPdf = a.mimeType === 'application/pdf';
+             const isBPdf = b.mimeType === 'application/pdf';
+             if (isAPdf && !isBPdf) return -1;
+             if (!isAPdf && isBPdf) return 1;
+             return a.name.localeCompare(b.name); // Ordina gli altri per nome
+         });
+
+
+        files.forEach((file) => {
+            const isPdf = file.mimeType === 'application/pdf';
+
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            
+            const thumbnail = document.createElement('img');
+            thumbnail.className = 'thumbnail';
+            thumbnail.alt = file.name;
+            thumbnail.loading = 'lazy';
+
+            if (isPdf) {
+                card.classList.add('pdf-card');
+                thumbnail.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/1200px-PDF_file_icon.svg.png';
+                // Aggiunge nome file sotto icona PDF
+                const pdfName = document.createElement('p');
+                pdfName.textContent = file.name;
+                card.appendChild(thumbnail);
+                card.appendChild(pdfName);
+                pdfContainer.appendChild(card);
+                pdfFound = true;
+                 // Aggiunge evento click per PDF (passa ID e flag isPdf)
+                 card.addEventListener('click', () => openLightbox(file.id, true));
+            } else if (file.mimeType && file.mimeType.startsWith('image/')) {
+                card.classList.add('img-card');
+                thumbnail.src = file.thumbnailLink ? file.thumbnailLink.replace('=s220', '=s400') : ''; 
+                thumbnail.onerror = () => { thumbnail.src = ''; thumbnail.alt = 'Anteprima non disponibile'; }; 
+                card.appendChild(thumbnail); // Solo immagine per card immagine
+                imgContainer.appendChild(card);
+                imagesFound = true;
+                currentGalleryFiles.push(file); // Aggiunge a galleria navigabile
+                 const imageIndex = currentGalleryFiles.length - 1; 
+                 // Aggiunge evento click per Immagine (passa ID, flag isPdf=false, indice galleria)
+                 card.addEventListener('click', () => openLightbox(file.id, false, imageIndex));
+            }
+        });
+
+        // Nasconde sezioni vuote
+        if (!pdfFound && pdfSectionTitle) pdfSectionTitle.style.display = 'none';
+        if (!imagesFound && imgGalleryTitle) imgGalleryTitle.style.display = 'none';
+
+        // Attiva navigazione lightbox (chiamata una sola volta)
+        setupLightboxNavigation();
+    }
+
+    // ==============================================
+    // 🔹 LIGHTBOX
+    
+    function openLightbox(fileId, isPdf, imageIndex = -1) {
+        lightbox.classList.remove('hidden'); 
+        lightbox.classList.add('visible'); 
+        currentRotation = 0; 
+        lightboxIframe.style.transform = `rotate(0deg)`; // Resetta rotazione visiva
+
+        // Mostra SOLO l'iframe
+        lightboxIframe.style.display = 'block';
+        
+        // Usa SEMPRE il link /preview
+        lightboxIframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+        
+        // Gestisci visibilità controlli
+        if (rotateBtn) rotateBtn.style.display = 'block'; // Rotazione sempre visibile
+        const showNav = !isPdf && currentGalleryFiles.length > 1; // Navigazione solo per immagini multiple
+        if (prevBtn) prevBtn.style.display = showNav ? 'block' : 'none';
+        if (nextBtn) nextBtn.style.display = showNav ? 'block' : 'none';
+        
+        // Aggiorna contatore
+        if(lightboxCounter){ // Controlla se l'elemento esiste
+            if(isPdf){
+                const pdfGlobalIndex = allFiles.findIndex(f => f.id === fileId);
+                lightboxCounter.textContent = `File ${pdfGlobalIndex + 1} di ${allFiles.length}`; 
+            } else {
+                currentIndex = imageIndex; 
+                lightboxCounter.textContent = `Immagine ${currentIndex + 1} di ${currentGalleryFiles.length}`; 
+            }
+        } else {
+            console.warn("Elemento contatore non trovato!"); 
+        }
+    }
+
+    function closeLightbox() {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('visible');
+        lightboxIframe.src = ''; 
+        lightboxIframe.style.transform = ''; 
+    }
+
+    function rotate() {
+        currentRotation = (currentRotation + 90) % 360;
+        lightboxIframe.style.transform = `rotate(${currentRotation}deg)`;
+    }
+
+    // Naviga SOLO tra le immagini
+    function navigate(dir) {
+        if (currentGalleryFiles.length <= 1 || currentIndex === -1) return; 
+        currentIndex = (currentIndex + dir + currentGalleryFiles.length) % currentGalleryFiles.length;
+        const nextFile = currentGalleryFiles[currentIndex];
+        openLightbox(nextFile.id, false, currentIndex); 
+    }
+
+    // Setup listener una sola volta
+    function setupLightboxNavigation(){
+        if (setupLightboxNavigation.initialized) return; 
+        setupLightboxNavigation.initialized = true; 
+
+        if (closeLightboxBtn) closeLightboxBtn.addEventListener('click', closeLightbox);
+        if (rotateBtn) rotateBtn.addEventListener('click', rotate);
+        if (prevBtn) prevBtn.addEventListener('click', () => navigate(-1));
+        if (nextBtn) nextBtn.addEventListener('click', () => navigate(1));
+
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('hidden')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (prevBtn && prevBtn.style.display !== 'none') {
+                 if (e.key === 'ArrowRight') navigate(1);
+                 if (e.key === 'ArrowLeft') navigate(-1);
+            }
+            if (rotateBtn && rotateBtn.style.display !== 'none') { 
+                if (e.key === 'r' || e.key === 'R') rotate();
+            }
+        });
+         lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) { 
+                closeLightbox();
+            }
+         });
+    }
+
+    // ==============================================
+    // 🔹 EFFETTO HEADER
+    if (header) { 
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) header.classList.add('hidden'); 
+            else header.classList.remove('hidden');
+        });
+    }
+}); // <-- Assicurati che questa parentesi graffa finale ci sia!
+```eof
