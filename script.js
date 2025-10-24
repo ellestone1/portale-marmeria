@@ -93,6 +93,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     closeBtn.addEventListener('click', () => {
-        lightbox.classList.add('hidden');
-        iframe.src = ''
+    lightbox.classList.add('hidden');
+    iframe.src = '';
+    });
+
 });
+
