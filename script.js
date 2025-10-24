@@ -3,7 +3,7 @@
 // Supporta PDF e immagini da Google Drive (public folder)
 // =========================================================
 
-const API_KEY = "INSERISCI_LA_TUA_API_KEY"; // <- metti qui la tua chiave Google Drive API se vuoi usare folderId
+const API_KEY = "AIzaSyBg_v7mveOrwTc0plNByUZ-BXjJOWv5AIg"; // <- metti qui la tua chiave Google Drive API se vuoi usare folderId
 
 let filesData = [];
 let currentFileIndex = 0;
