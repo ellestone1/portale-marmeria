@@ -1,164 +1,156 @@
-// ================================================
-// Portale La Marmeria Battaglia - versione stabile
-// Nessuna chiave API richiesta (Google Drive public)
-// ================================================
+document.addEventListener('DOMContentLoaded', async function () {
+    // ==============================================
+    // 🔧 CONFIGURAZIONE
+    const API_KEY = 'AIzaSyBg_v7mveOrwTc0plNByUZ-BXjJOWv5AIg';
+    // ==============================================
 
-let filesData = [];
-let currentFileIndex = 0;
-let currentRotation = 0;
+    const params = new URLSearchParams(window.location.search);
+    const codiceDv = params.get('codiceDv');
+    const folderId = params.get('folderId');
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const params = new URLSearchParams(window.location.search);
-  const codiceDv = params.get("codiceDv") || "DV-0000";
-  const folderParam = params.get("folderId");
+    const dvDisplay = document.getElementById('codice-dv-display');
+    const fileGrid = document.getElementById('file-grid');
 
-  document.getElementById("codice-dv").textContent = codiceDv;
+    console.log('[PORTALE] Folder ID ricevuto:', folderId);
 
-  // Gestione header (nascondi in scroll)
-  const header = document.getElementById("main-header");
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 100) header.classList.add("hidden");
-    else header.classList.remove("hidden");
-  });
-
-  if (!folderParam) {
-    document.getElementById("pdf-container").innerHTML =
-      "<p>Nessuna cartella specificata.</p>";
-    return;
-  }
-
-  const folderId = extractFolderId(folderParam);
-  console.log("[PORTALE] Folder ID:", folderId);
-
-  // 🔹 Usa la pagina pubblica della cartella per estrarre i file
-  try {
-    const html = await fetch(`https://drive.google.com/embeddedfolderview?id=${folderId}#list`)
-      .then((res) => res.text());
-
-    // 🔍 Estrai i file dalla pagina HTML pubblica di Google Drive
-    const regex = /"([a-zA-Z0-9_-]{10,})","(.*?)","(image\/[a-zA-Z0-9.+-]+|application\/pdf)"/g;
-    let match;
-    const files = [];
-
-    while ((match = regex.exec(html)) !== null) {
-      files.push({
-        id: match[1],
-        name: decodeURIComponent(match[2]),
-        mimeType: match[3],
-      });
+    if (codiceDv) {
+        dvDisplay.textContent = codiceDv;
+    } else {
+        dvDisplay.textContent = 'Codice non specificato';
     }
 
-    if (!files.length) throw new Error("Nessun file trovato nella cartella.");
+    if (!API_KEY || API_KEY === 'INSERISCI_LA_TUA_CHIAVE_API_QUI') {
+        fileGrid.innerHTML = `<p style="color:red;">⚠️ Chiave API mancante. Inserisci la tua chiave Google Drive API.</p>`;
+        return;
+    }
 
-    // Ordina PDF prima, immagini dopo
-    files.sort((a, b) => {
-      const aPdf = a.mimeType.includes("pdf");
-      const bPdf = b.mimeType.includes("pdf");
-      return aPdf === bPdf ? 0 : aPdf ? -1 : 1;
+    if (!folderId) {
+        fileGrid.innerHTML = `<p style="color:red;">⚠️ Nessun ID cartella trovato. Controlla il link Make o il QR Code.</p>`;
+        return;
+    }
+
+    const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,thumbnailLink,webViewLink)&key=${API_KEY}`;
+    console.log('[PORTALE] API URL:', apiUrl);
+
+    try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('[PORTALE] Errore API:', data.error);
+            fileGrid.innerHTML = `<p style="color:red;">Errore Google API: ${data.error.message}</p>`;
+            return;
+        }
+
+        if (!data.files || data.files.length === 0) {
+            fileGrid.innerHTML = `<p>Nessun file trovato. La cartella potrebbe essere vuota o non pubblica.</p>`;
+            return;
+        }
+
+        renderFiles(data.files);
+    } catch (error) {
+        console.error('[PORTALE] Errore di rete:', error);
+        fileGrid.innerHTML = `<p style="color:red;">Errore nel collegamento con Google Drive.</p>`;
+    }
+
+    // ==============================================
+    // 🔹 FUNZIONE PRINCIPALE: RENDER FILE
+    function renderFiles(files) {
+        fileGrid.innerHTML = '';
+        let pdfs = [];
+        let images = [];
+
+        files.forEach(file => {
+            if (file.mimeType === 'application/pdf') pdfs.push(file);
+            else if (file.mimeType.startsWith('image/')) images.push(file);
+        });
+
+        // Mostra prima il PDF principale
+        if (pdfs.length > 0) {
+            const pdf = pdfs[0];
+            const card = document.createElement('div');
+            card.className = 'file-card pdf-card';
+            card.innerHTML = `
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF">
+                <p>${pdf.name}</p>
+            `;
+            card.addEventListener('click', () => openLightbox(pdf.webViewLink, true));
+            fileGrid.appendChild(card);
+        }
+
+        // Divider “Galleria fotografica”
+        if (images.length > 0) {
+            const divider = document.createElement('h3');
+            divider.textContent = 'Galleria Fotografica';
+            divider.className = 'gallery-title';
+            fileGrid.appendChild(divider);
+        }
+
+        // Mostra le immagini
+        images.forEach((file, index) => {
+            const card = document.createElement('div');
+            card.className = 'file-card img-card';
+            const thumb = file.thumbnailLink
+                ? file.thumbnailLink.replace('=s220', '=s800')
+                : `https://drive.google.com/uc?export=view&id=${file.id}`;
+
+            card.innerHTML = `<img src="${thumb}" alt="${file.name}" loading="lazy">`;
+            card.addEventListener('click', () => openLightbox(file.id, false));
+            fileGrid.appendChild(card);
+        });
+    }
+
+    // ==============================================
+    // 🔹 LIGHTBOX
+    const lightbox = document.getElementById('lightbox');
+    const iframe = document.getElementById('lightbox-iframe');
+    const closeBtn = document.getElementById('close-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const rotateBtn = document.getElementById('rotate-btn');
+
+    let currentIndex = 0;
+    let rotation = 0;
+    let galleryFiles = [];
+
+    function openLightbox(fileIdOrUrl, isPdf) {
+        lightbox.classList.add('visible');
+        rotation = 0;
+
+        if (isPdf) {
+            iframe.src = fileIdOrUrl.includes('drive.google')
+                ? fileIdOrUrl
+                : `https://drive.google.com/file/d/${fileIdOrUrl}/preview`;
+        } else {
+            iframe.src = `https://drive.google.com/uc?export=view&id=${fileIdOrUrl}`;
+        }
+    }
+
+    closeBtn.addEventListener('click', () => {
+        lightbox.classList.remove('visible');
+        iframe.src = '';
     });
 
-    filesData = files;
-    renderFiles(files);
-  } catch (err) {
-    console.error("Errore nel caricamento:", err);
-    document.getElementById("pdf-container").innerHTML =
-      "<p>Errore nel caricamento della cartella Google Drive.</p>";
-  }
-});
+    rotateBtn.addEventListener('click', () => {
+        rotation = (rotation + 90) % 360;
+        iframe.style.transform = `rotate(${rotation}deg)`;
+    });
 
-// ====== Estrai ID da URL completo ======
-function extractFolderId(url) {
-  const match = url.match(/[-\w]{10,}/);
-  return match ? match[0] : url;
-}
+    prevBtn.addEventListener('click', () => navigate(-1));
+    nextBtn.addEventListener('click', () => navigate(1));
 
-// ====== Render file in pagina ======
-function renderFiles(files) {
-  const pdfContainer = document.getElementById("pdf-container");
-  const imgContainer = document.getElementById("img-container");
-  pdfContainer.innerHTML = "";
-  imgContainer.innerHTML = "";
-
-  files.forEach((file, index) => {
-    const name = file.name || "file";
-
-    if (file.mimeType.includes("pdf")) {
-      const div = document.createElement("div");
-      div.className = "pdf-card";
-      div.innerHTML = `
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF">
-        <p class="file-name">${name}</p>`;
-      div.onclick = () => showLightbox(index);
-      pdfContainer.appendChild(div);
+    function navigate(dir) {
+        if (galleryFiles.length === 0) return;
+        currentIndex = (currentIndex + dir + galleryFiles.length) % galleryFiles.length;
+        const nextFile = galleryFiles[currentIndex];
+        openLightbox(nextFile.id, nextFile.mimeType === 'application/pdf');
     }
 
-    if (file.mimeType.startsWith("image/")) {
-      const div = document.createElement("div");
-      div.className = "img-card";
-      const thumb = `https://drive.google.com/uc?export=view&id=${file.id}`;
-      div.innerHTML = `<img loading="lazy" src="${thumb}" alt="${name}">`;
-      div.onclick = () => showLightbox(index);
-      imgContainer.appendChild(div);
-    }
-  });
-
-  if (!files.some(f => f.mimeType.includes("pdf"))) {
-    document.querySelector(".documentazione h2").style.display = "none";
-  }
-}
-
-// ====== LIGHTBOX ======
-function showLightbox(index) {
-  const file = filesData[index];
-  currentFileIndex = index;
-  currentRotation = 0;
-
-  const lightbox = document.getElementById("lightbox");
-  const iframe = document.getElementById("lightbox-iframe");
-  const img = document.getElementById("lightbox-img");
-
-  iframe.style.display = "none";
-  img.style.display = "none";
-
-  if (file.mimeType.includes("pdf")) {
-    iframe.src = `https://drive.google.com/file/d/${file.id}/preview`;
-    iframe.style.display = "block";
-  } else if (file.mimeType.startsWith("image/")) {
-    const src = `https://drive.google.com/uc?export=view&id=${file.id}`;
-    img.src = src;
-    img.style.display = "block";
-  }
-
-  lightbox.classList.add("visible");
-}
-
-// ====== COMANDI LIGHTBOX ======
-document.getElementById("close-lightbox").onclick = () => {
-  document.getElementById("lightbox-iframe").src = "";
-  document.getElementById("lightbox").classList.remove("visible");
-};
-document.getElementById("next-btn").onclick = () => navigateLightbox(1);
-document.getElementById("prev-btn").onclick = () => navigateLightbox(-1);
-document.getElementById("rotate-btn").onclick = () => {
-  currentRotation = (currentRotation + 90) % 360;
-  const img = document.getElementById("lightbox-img");
-  img.style.transform = `rotate(${currentRotation}deg)`;
-};
-
-function navigateLightbox(direction) {
-  if (!filesData.length) return;
-  currentFileIndex = (currentFileIndex + direction + filesData.length) % filesData.length;
-  showLightbox(currentFileIndex);
-}
-
-// ====== Adatta lightbox a orientamento ======
-window.addEventListener("orientationchange", () => {
-  setTimeout(() => {
-    const lightbox = document.getElementById("lightbox");
-    const iframe = document.getElementById("lightbox-iframe");
-    if (lightbox.classList.contains("visible")) {
-      iframe.style.height = window.innerHeight * 0.9 + "px";
-      iframe.style.width = window.innerWidth * 0.95 + "px";
-    }
-  }, 400);
+    // ==============================================
+    // 🔹 EFFETTO HEADER (nascondi in scroll)
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 100) header.classList.add('hidden');
+        else header.classList.remove('hidden');
+    });
 });
