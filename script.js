@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const API_KEY = "INSERISCI_LA_TUA_CHIAVE_API_GOOGLE_DRIVE";
+  const API_KEY = "AIzaSyBg_v7mveOrwTc0plNByUZ-BXjJOWv5AIg";
 
   const params = new URLSearchParams(window.location.search);
   const codiceDv = params.get('codiceDv') || 'DV-0000';
