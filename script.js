@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+  // Inserisci qui la tua API Key
   const API_KEY = "AIzaSyBg_v7mveOrwTc0plNByUZ-BXjJOWv5AIg";
 
   const params = new URLSearchParams(window.location.search);
@@ -28,28 +29,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    if (!data.files || data.files.length === 0) {
+      pdfContainer.innerHTML = "<p>Nessun file trovato in questa cartella.</p>";
+      return;
+    }
+
     data.files.forEach(file => {
+      // Mostra PDF
       if (file.mimeType === "application/pdf") {
         const pdfCard = document.createElement("div");
         pdfCard.className = "pdf-card";
         pdfCard.innerHTML = `
           <a href="${file.webViewLink}" target="_blank">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" class="pdf-icon">
-            <p>${file.name}</p>
-          </a>
-        `;
-        pdfContainer.appendChild(pdfCard);
-      } else if (file.mimeType.startsWith("image/")) {
-        const img = document.createElement("img");
-        img.src = `https://drive.google.com/uc?export=view&id=${file.id}`;
-        img.alt = file.name;
-        img.className = "preview-img";
-        imgContainer.appendChild(img);
-      }
-    });
-
-  } catch (err) {
-    console.error("Errore fetch:", err);
-    pdfContainer.innerHTML = "<p style='color:red;'>Errore di connessione al server.</p>";
-  }
-});
+            <img src="https://upload.wikimedia.org/wikipedia/commons
