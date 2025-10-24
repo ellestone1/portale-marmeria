@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheda Progetto - La Marmeria Battaglia</title>
+  <link rel="stylesheet" href="stile.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header id="main-header">
+    <img src="img/logo.png" alt="Logo La Marmeria Battaglia" class="logo">
+    <nav class="nav-links">
+      <a href="#" target="_blank">Sito Web</a>
+      <a href="#" target="_blank">Chi Siamo</a>
+      <a href="#" target="_blank">Contatti</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1 class="titolo">Scheda Progetto</h1>
+      <p id="codice-dv" class="codice-dv">DV-0000</p>
+    </section>
+
+    <section class="documentazione">
+      <h2>Documentazione Tecnica</h2>
+      <div id="pdf-container" class="pdf-container"></div>
+    </section>
+
+    <section class="galleria">
+      <h2>Galleria Fotografica</h2>
+      <div id="img-container" class="img-container"></div>
+    </section>
+  </main>
+
+  <div id="lightbox" class="lightbox hidden">
+    <span id="close-lightbox" class="close">&times;</span>
+    <iframe id="lightbox-iframe" class="lightbox-content"></iframe>
+    <img id="lightbox-img" class="lightbox-content" alt="">
+    <div class="lightbox-controls">
+      <button id="prev-btn">◀</button>
+      <button id="next-btn">▶</button>
+      <button id="rotate-btn">⟳</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
