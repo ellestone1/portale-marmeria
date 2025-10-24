@@ -1,48 +1,55 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheda Progetto - La Marmeria Battaglia</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="stile.css">
-</head>
-<body>
-    <header id="main-header">
-        <img src="https://i.postimg.cc/mg5bwRqY/ritaglio.png" alt="Logo La Marmeria Battaglia" class="logo">
-        <nav class="nav-links">
-            <a href="#" target="_blank">Sito Web</a>
-            <a href="#" target="_blank">Chi Siamo</a>
-            <a href="#" target="_blank">Contatti</a>
-        </nav>
-    </header>
+document.addEventListener('DOMContentLoaded', async () => {
+  const API_KEY = "INSERISCI_LA_TUA_CHIAVE_API_GOOGLE_DRIVE";
 
-    <main>
-        <section class="intro">
-            <h1 class="titolo">Scheda Progetto</h1>
-            <p id="codice-dv" class="codice-dv">Caricamento...</p> </section>
+  const params = new URLSearchParams(window.location.search);
+  const codiceDv = params.get('codiceDv') || 'DV-0000';
+  const folderId = params.get('folderId');
 
-        <section class="documentazione">
-            <h2 id="pdf-title">Documentazione Tecnica</h2> <div id="pdf-container" class="pdf-container">
-                </div>
-        </section>
+  document.getElementById('codice-dv').textContent = codiceDv;
 
-        <section class="galleria">
-            <h2 id="gallery-title">Galleria Fotografica</h2> <div id="img-container" class="img-container">
-                </div>
-        </section>
-    </main>
+  const pdfContainer = document.getElementById('pdf-container');
+  const imgContainer = document.getElementById('img-container');
 
-    <div id="lightbox" class="lightbox hidden"> <span id="close-lightbox" class="close">&times;</span>
-        <iframe id="lightbox-iframe" class="lightbox-content" frameborder="0"></iframe> <div class="lightbox-controls">
-             <button id="prev-btn" title="Precedente (←)">◀</button>
-             <span id="lightbox-counter" class="counter"></span> <button id="rotate-btn" title="Ruota (R)">⟳</button>
-             <button id="next-btn" title="Successivo (→)">▶</button>
-        </div>
-    </div>
+  if (!folderId) {
+    pdfContainer.innerHTML = "<p style='color:red;'>Errore: folderId mancante nell’URL.</p>";
+    return;
+  }
 
-    <script src="script.js"></script>
-</body>
-</html>
+  const apiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,thumbnailLink,webViewLink)&key=${API_KEY}`;
+  console.log("[PORTALE] Fetch:", apiUrl);
+
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.error) {
+      console.error("Errore API:", data.error);
+      pdfContainer.innerHTML = `<p style="color:red;">Errore Google API: ${data.error.message}</p>`;
+      return;
+    }
+
+    data.files.forEach(file => {
+      if (file.mimeType === "application/pdf") {
+        const pdfCard = document.createElement("div");
+        pdfCard.className = "pdf-card";
+        pdfCard.innerHTML = `
+          <a href="${file.webViewLink}" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" class="pdf-icon">
+            <p>${file.name}</p>
+          </a>
+        `;
+        pdfContainer.appendChild(pdfCard);
+      } else if (file.mimeType.startsWith("image/")) {
+        const img = document.createElement("img");
+        img.src = `https://drive.google.com/uc?export=view&id=${file.id}`;
+        img.alt = file.name;
+        img.className = "preview-img";
+        imgContainer.appendChild(img);
+      }
+    });
+
+  } catch (err) {
+    console.error("Errore fetch:", err);
+    pdfContainer.innerHTML = "<p style='color:red;'>Errore di connessione al server.</p>";
+  }
+});

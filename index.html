@@ -1,48 +1,39 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheda Progetto - La Marmeria Battaglia</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="stile.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheda Progetto - La Marmeria Battaglia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stile.css">
 </head>
 <body>
-    <header id="main-header">
-        <img src="https://i.postimg.cc/mg5bwRqY/ritaglio.png" alt="Logo La Marmeria Battaglia" class="logo">
-        <nav class="nav-links">
-            <a href="#" target="_blank">Sito Web</a>
-            <a href="#" target="_blank">Chi Siamo</a>
-            <a href="#" target="_blank">Contatti</a>
-        </nav>
-    </header>
+  <header>
+    <img src="https://i.postimg.cc/mg5bwRqY/ritaglio.png" alt="Logo La Marmeria Battaglia" class="logo">
+    <nav>
+      <a href="#" target="_blank">Sito Web</a>
+      <a href="#" target="_blank">Chi Siamo</a>
+      <a href="#" target="_blank">Contatti</a>
+    </nav>
+  </header>
 
-    <main>
-        <section class="intro">
-            <h1 class="titolo">Scheda Progetto</h1>
-            <p id="codice-dv" class="codice-dv">Caricamento...</p> </section>
+  <main>
+    <section class="intro">
+      <h1>Scheda Progetto</h1>
+      <p id="codice-dv">Caricamento...</p>
+    </section>
 
-        <section class="documentazione">
-            <h2 id="pdf-title">Documentazione Tecnica</h2> <div id="pdf-container" class="pdf-container">
-                </div>
-        </section>
+    <section>
+      <h2>Documentazione Tecnica</h2>
+      <div id="pdf-container" class="pdf-container"></div>
+    </section>
 
-        <section class="galleria">
-            <h2 id="gallery-title">Galleria Fotografica</h2> <div id="img-container" class="img-container">
-                </div>
-        </section>
-    </main>
+    <section>
+      <h2>Galleria Fotografica</h2>
+      <div id="img-container" class="img-container"></div>
+    </section>
+  </main>
 
-    <div id="lightbox" class="lightbox hidden"> <span id="close-lightbox" class="close">&times;</span>
-        <iframe id="lightbox-iframe" class="lightbox-content" frameborder="0"></iframe> <div class="lightbox-controls">
-             <button id="prev-btn" title="Precedente (←)">◀</button>
-             <span id="lightbox-counter" class="counter"></span> <button id="rotate-btn" title="Ruota (R)">⟳</button>
-             <button id="next-btn" title="Successivo (→)">▶</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
